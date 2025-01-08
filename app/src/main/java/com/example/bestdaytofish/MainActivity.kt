@@ -32,6 +32,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.material3.MaterialTheme.shapes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
+data class BottomNavigationItem(
+    val title: String,
+    val icon: @Composable () -> Unit,
+    val route: String
+)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,8 +61,70 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    WeatherScreen()
+                    MainScreen()
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun MainScreen() {
+    var selectedItem by remember { mutableStateOf(0) }
+    
+    val navigationItems = listOf(
+        BottomNavigationItem(
+            title = "Weather",
+            icon = { Icon(Icons.Default.Cloud, contentDescription = "Weather") },
+            route = "weather"
+        ),
+        BottomNavigationItem(
+            title = "Search",
+            icon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+            route = "search"
+        ),
+        BottomNavigationItem(
+            title = "Favorites",
+            icon = { Icon(Icons.Default.Favorite, contentDescription = "Favorites") },
+            route = "favorites"
+        ),
+        BottomNavigationItem(
+            title = "Account",
+            icon = { Icon(Icons.Default.Person, contentDescription = "Account") },
+            route = "account"
+        ),
+        BottomNavigationItem(
+            title = "FAQ",
+            icon = { Icon(Icons.Outlined.Info, contentDescription = "FAQ") },
+            route = "faq"
+        )
+    )
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                navigationItems.forEachIndexed { index, item ->
+                    NavigationBarItem(
+                        icon = item.icon,
+                        label = { Text(item.title) },
+                        selected = selectedItem == index,
+                        onClick = { selectedItem = index }
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when (selectedItem) {
+                0 -> WeatherScreen()
+                1 -> Text("Search Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                2 -> Text("Favorites Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                3 -> Text("Account Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                4 -> Text("FAQ Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
             }
         }
     }
@@ -120,6 +201,7 @@ fun WeatherCard(weather: DailyWeather) {
     val fishingScore = FishingConditions.calculateFishingScore(weather)
     val conditionText = FishingConditions.getFishingConditionText(fishingScore)
     val gradientColors = getGradientColors(fishingScore)
+    val textColor = getDarkerTextColor(fishingScore)
     
     Card(
         modifier = Modifier
@@ -149,31 +231,31 @@ fun WeatherCard(weather: DailyWeather) {
                         Text(
                             text = formatDate(weather.dt),
                             style = MaterialTheme.typography.titleLarge,
-                            color = Color.White,
+                            color = textColor,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = conditionText,
                             style = MaterialTheme.typography.titleMedium,
-                            color = Color.White.copy(alpha = 0.9f)
+                            color = textColor.copy(alpha = 0.9f)
                         )
                     }
-                    FishingScoreIndicator(score = fishingScore)
+                    FishingScoreIndicator(score = fishingScore, textColor = textColor)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                WeatherDetails(weather)
+                WeatherDetails(weather, textColor)
             }
         }
     }
 }
 
 @Composable
-fun WeatherDetails(weather: DailyWeather) {
+fun WeatherDetails(weather: DailyWeather, textColor: Color) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                Color.White.copy(alpha = 0.15f),
+                textColor.copy(alpha = 0.1f),
                 shape = shapes.medium
             )
             .padding(12.dp),
@@ -181,49 +263,53 @@ fun WeatherDetails(weather: DailyWeather) {
     ) {
         WeatherDetailItem(
             label = "Temp",
-            value = "${weather.main.temp.toInt()}°F"
+            value = "${weather.main.temp.toInt()}°F",
+            textColor = textColor
         )
         WeatherDetailItem(
             label = "Wind",
-            value = "${weather.wind.speed.toInt()} mph"
+            value = "${weather.wind.speed.toInt()} mph",
+            textColor = textColor
         )
         WeatherDetailItem(
             label = "Humidity",
-            value = "${weather.main.humidity}%"
+            value = "${weather.main.humidity}%",
+            textColor = textColor
         )
         WeatherDetailItem(
             label = "Conditions",
-            value = weather.weather.firstOrNull()?.main ?: ""
+            value = weather.weather.firstOrNull()?.main ?: "",
+            textColor = textColor
         )
     }
 }
 
 @Composable
-fun WeatherDetailItem(label: String, value: String) {
+fun WeatherDetailItem(label: String, value: String, textColor: Color) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = 0.7f)
+            color = textColor.copy(alpha = 0.7f)
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.White,
+            color = textColor,
             fontWeight = FontWeight.Medium
         )
     }
 }
 
 @Composable
-fun FishingScoreIndicator(score: Int) {
+fun FishingScoreIndicator(score: Int, textColor: Color) {
     Box(
         modifier = Modifier
             .size(80.dp)
             .background(
-                Color.White.copy(alpha = 0.15f),
+                textColor.copy(alpha = 0.1f),
                 CircleShape
             )
             .padding(8.dp),
@@ -232,13 +318,13 @@ fun FishingScoreIndicator(score: Int) {
         CircularProgressIndicator(
             progress = score / 100f,
             modifier = Modifier.fillMaxSize(),
-            color = Color.White,
+            color = textColor,
             strokeWidth = 5.dp,
-            trackColor = Color.White.copy(alpha = 0.2f)
+            trackColor = textColor.copy(alpha = 0.2f)
         )
         Text(
             text = "$score%",
-            color = Color.White,
+            color = textColor,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -246,26 +332,35 @@ fun FishingScoreIndicator(score: Int) {
 }
 
 @Composable
+fun getDarkerTextColor(score: Int): Color = when (score) {
+    in 0..20 -> Color(0xFF4A0000)  // Dark red
+    in 21..40 -> Color(0xFF7A1C1C)  // Darker red
+    in 41..60 -> Color(0xFF875100)  // Dark orange
+    in 61..80 -> Color(0xFF2C5A1E)  // Dark green
+    else -> Color(0xFF1B4F1F)       // Darker green
+}
+
+@Composable
 fun getGradientColors(score: Int): List<Color> = when (score) {
     in 0..20 -> listOf(
-        Color(0xFF8B0000),
-        Color(0xFFD32F2F)
+        Color(0xFFFFCDD2),  // Lighter red
+        Color(0xFFEF9A9A)   // Light red
     )
     in 21..40 -> listOf(
-        Color(0xFFD32F2F),
-        Color(0xFFFF5722)
+        Color(0xFFFFCCBC),  // Lighter orange-red
+        Color(0xFFFFAB91)   // Light orange-red
     )
     in 41..60 -> listOf(
-        Color(0xFFFF9800),
-        Color(0xFFFFA726)
+        Color(0xFFFFE0B2),  // Lighter orange
+        Color(0xFFFFCC80)   // Light orange
     )
     in 61..80 -> listOf(
-        Color(0xFF7CB342),
-        Color(0xFF8BC34A)
+        Color(0xFFDCEDC8),  // Lighter green
+        Color(0xFFC5E1A5)   // Light green
     )
     else -> listOf(
-        Color(0xFF2E7D32),
-        Color(0xFF43A047)
+        Color(0xFFC8E6C9),  // Lighter green
+        Color(0xFFA5D6A7)   // Light green
     )
 }
 
