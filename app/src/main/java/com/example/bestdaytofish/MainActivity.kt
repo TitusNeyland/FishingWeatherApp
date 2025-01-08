@@ -22,6 +22,16 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.material3.MaterialTheme.shapes
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,37 +55,42 @@ fun WeatherScreen(viewModel: WeatherViewModel = viewModel()) {
         viewModel.fetchWeather()
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        Text(
-            text = "7-Day Weather Forecast",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Column {
+            Text(
+                text = "Best Days to Fish",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                textAlign = TextAlign.Center
+            )
 
-        when {
-            viewModel.isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-            }
-            viewModel.error != null -> {
-                Text(
-                    text = "Error: ${viewModel.error}",
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            else -> {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(viewModel.weatherState) { weather ->
-                        WeatherCard(weather)
+            when {
+                viewModel.isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                }
+                viewModel.error != null -> {
+                    ErrorMessage(viewModel.error!!)
+                }
+                else -> {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(viewModel.weatherState) { weather ->
+                            WeatherCard(weather)
+                        }
                     }
                 }
             }
@@ -84,51 +99,121 @@ fun WeatherScreen(viewModel: WeatherViewModel = viewModel()) {
 }
 
 @Composable
+fun ErrorMessage(error: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        )
+    ) {
+        Text(
+            text = "Error: $error",
+            color = MaterialTheme.colorScheme.onErrorContainer,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Composable
 fun WeatherCard(weather: DailyWeather) {
     val fishingScore = FishingConditions.calculateFishingScore(weather)
     val conditionText = FishingConditions.getFishingConditionText(fishingScore)
+    val gradientColors = getGradientColors(fishingScore)
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shapes.large),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = formatDate(weather.dt),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                FishingScoreIndicator(score = fishingScore)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text("Temperature: ${weather.main.temp}°F")
-                    Text("Wind: ${weather.wind.speed} mph")
-                    Text("Humidity: ${weather.main.humidity}%")
-                    Text("Conditions: ${weather.weather.firstOrNull()?.main ?: ""}")
-                }
-                Column(
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(
-                        text = conditionText,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = getFishingScoreColor(fishingScore)
+                .background(
+                    Brush.verticalGradient(
+                        colors = gradientColors
                     )
+                )
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = formatDate(weather.dt),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = conditionText,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                    }
+                    FishingScoreIndicator(score = fishingScore)
                 }
+                Spacer(modifier = Modifier.height(16.dp))
+                WeatherDetails(weather)
             }
         }
+    }
+}
+
+@Composable
+fun WeatherDetails(weather: DailyWeather) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Color.White.copy(alpha = 0.15f),
+                shape = shapes.medium
+            )
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        WeatherDetailItem(
+            label = "Temp",
+            value = "${weather.main.temp.toInt()}°F"
+        )
+        WeatherDetailItem(
+            label = "Wind",
+            value = "${weather.wind.speed.toInt()} mph"
+        )
+        WeatherDetailItem(
+            label = "Humidity",
+            value = "${weather.main.humidity}%"
+        )
+        WeatherDetailItem(
+            label = "Conditions",
+            value = weather.weather.firstOrNull()?.main ?: ""
+        )
+    }
+}
+
+@Composable
+fun WeatherDetailItem(label: String, value: String) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = 0.7f)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.White,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
@@ -136,28 +221,52 @@ fun WeatherCard(weather: DailyWeather) {
 fun FishingScoreIndicator(score: Int) {
     Box(
         modifier = Modifier
-            .size(40.dp)
+            .size(80.dp)
             .background(
-                color = getFishingScoreColor(score),
-                shape = CircleShape
-            ),
+                Color.White.copy(alpha = 0.15f),
+                CircleShape
+            )
+            .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
+        CircularProgressIndicator(
+            progress = score / 100f,
+            modifier = Modifier.fillMaxSize(),
+            color = Color.White,
+            strokeWidth = 5.dp,
+            trackColor = Color.White.copy(alpha = 0.2f)
+        )
         Text(
             text = "$score%",
             color = Color.White,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
         )
     }
 }
 
 @Composable
-fun getFishingScoreColor(score: Int): Color = when (score) {
-    in 0..20 -> Color.Red
-    in 21..40 -> Color(0xFFFF6B6B)  // Light red
-    in 41..60 -> Color(0xFFFFB347)  // Orange
-    in 61..80 -> Color(0xFF77DD77)  // Light green
-    else -> Color(0xFF2ECC71)  // Green
+fun getGradientColors(score: Int): List<Color> = when (score) {
+    in 0..20 -> listOf(
+        Color(0xFF8B0000),
+        Color(0xFFD32F2F)
+    )
+    in 21..40 -> listOf(
+        Color(0xFFD32F2F),
+        Color(0xFFFF5722)
+    )
+    in 41..60 -> listOf(
+        Color(0xFFFF9800),
+        Color(0xFFFFA726)
+    )
+    in 61..80 -> listOf(
+        Color(0xFF7CB342),
+        Color(0xFF8BC34A)
+    )
+    else -> listOf(
+        Color(0xFF2E7D32),
+        Color(0xFF43A047)
+    )
 }
 
 private fun formatDate(timestamp: Long): String {
