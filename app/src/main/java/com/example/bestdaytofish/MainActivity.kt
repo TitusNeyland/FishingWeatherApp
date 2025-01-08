@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bestdaytofish.data.DailyWeather
+import com.example.bestdaytofish.data.FaqArticle
 import com.example.bestdaytofish.ui.theme.BestDayToFishTheme
 import com.example.bestdaytofish.util.FishingConditions
 import com.example.bestdaytofish.viewmodel.WeatherViewModel
@@ -47,6 +48,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Divider
 
 data class BottomNavigationItem(
     val title: String,
@@ -109,7 +113,7 @@ fun MainScreen() {
             route = "account"
         ),
         BottomNavigationItem(
-            title = "FAQ",
+            title = "Guide",
             icon = { Icon(Icons.Outlined.Info, contentDescription = "FAQ") },
             route = "faq"
         )
@@ -147,7 +151,7 @@ fun MainScreen() {
                     1 -> Text("Search Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
                     2 -> Text("Favorites Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
                     3 -> Text("Account Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
-                    4 -> Text("FAQ Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                    4 -> FaqScreen()
                 }
             }
         }
@@ -404,5 +408,121 @@ fun WeatherDetailsScreen() {
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
         )
+    }
+}
+
+private val faqArticles = listOf(
+    FaqArticle(
+        "Best Time of Day to Fish",
+        "Dawn and dusk are generally the best times to fish. During these periods, fish are more active due to cooler temperatures and reduced light. Early morning is particularly good as many fish species feed actively during this time.",
+        "Timing"
+    ),
+    FaqArticle(
+        "Seasonal Fishing Guide",
+        "Spring: Fish are more active as waters warm up\n" +
+        "Summer: Early morning and late evening are best\n" +
+        "Fall: Mid-morning to late afternoon is optimal\n" +
+        "Winter: Mid-day fishing when temperatures are warmest",
+        "Seasons"
+    ),
+    FaqArticle(
+        "Weather Impact on Fishing",
+        "Fish are most active when barometric pressure is steady or on the rise. Light rain can trigger feeding activity, while heavy storms may cause fish to become less active. Overcast conditions often provide excellent fishing opportunities.",
+        "Weather"
+    ),
+    FaqArticle(
+        "Moon Phases and Fishing",
+        "Full and new moons typically offer better fishing conditions due to stronger tidal movements. The three days leading up to and after these moon phases are particularly good for fishing.",
+        "Timing"
+    ),
+    FaqArticle(
+        "Water Temperature Guide",
+        "Different fish species are active at different temperatures:\n" +
+        "• Bass: 60-75°F\n" +
+        "• Trout: 50-65°F\n" +
+        "• Walleye: 55-70°F\n" +
+        "• Catfish: 70-85°F",
+        "Conditions"
+    )
+)
+
+@Composable
+fun FaqScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Fishing Guide & Tips",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            textAlign = TextAlign.Center
+        )
+        
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(faqArticles) { article ->
+                FaqArticleCard(article)
+            }
+        }
+    }
+}
+
+@Composable
+fun FaqArticleCard(article: FaqArticle) {
+    var expanded by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = article.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = "Expand",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            
+            Text(
+                text = article.category,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            
+            if (expanded) {
+                Divider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+                Text(
+                    text = article.content,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+        }
     }
 }
