@@ -51,6 +51,8 @@ import kotlinx.coroutines.delay
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Divider
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.Menu
 
 data class BottomNavigationItem(
     val title: String,
@@ -149,6 +151,35 @@ fun MainScreen() {
 }
 
 @Composable
+fun TopBar() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.WaterDrop,
+            contentDescription = "Water Drop",
+            modifier = Modifier.size(32.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        
+        IconButton(
+            onClick = { /* TODO: Handle menu click */ }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Menu,
+                contentDescription = "Menu",
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
 fun WeatherScreen(viewModel: WeatherViewModel = viewModel()) {
     LaunchedEffect(Unit) {
         viewModel.fetchWeather()
@@ -161,16 +192,7 @@ fun WeatherScreen(viewModel: WeatherViewModel = viewModel()) {
             .padding(16.dp)
     ) {
         Column {
-            Text(
-                text = "Best Days to Fish",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.ExtraBold
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                textAlign = TextAlign.Center
-            )
+            TopBar()
 
             when {
                 viewModel.isLoading -> {
