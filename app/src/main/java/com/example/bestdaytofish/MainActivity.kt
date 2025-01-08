@@ -71,6 +71,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     var selectedItem by remember { mutableStateOf(0) }
+    var showWeatherDetails by remember { mutableStateOf(false) }
     
     val navigationItems = listOf(
         BottomNavigationItem(
@@ -100,31 +101,40 @@ fun MainScreen() {
         )
     )
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                navigationItems.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        icon = item.icon,
-                        label = { Text(item.title) },
-                        selected = selectedItem == index,
-                        onClick = { selectedItem = index }
-                    )
+    if (showWeatherDetails) {
+        WeatherDetailsScreen()
+    } else {
+        Scaffold(
+            bottomBar = {
+                NavigationBar {
+                    navigationItems.forEachIndexed { index, item ->
+                        NavigationBarItem(
+                            icon = item.icon,
+                            label = { Text(item.title) },
+                            selected = selectedItem == index,
+                            onClick = { 
+                                selectedItem = index
+                                if (index == 0) {
+                                    showWeatherDetails = true
+                                }
+                            }
+                        )
+                    }
                 }
             }
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when (selectedItem) {
-                0 -> WeatherScreen()
-                1 -> Text("Search Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
-                2 -> Text("Favorites Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
-                3 -> Text("Account Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
-                4 -> Text("FAQ Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                when (selectedItem) {
+                    0 -> WeatherScreen()
+                    1 -> Text("Search Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                    2 -> Text("Favorites Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                    3 -> Text("Account Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                    4 -> Text("FAQ Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                }
             }
         }
     }
@@ -367,4 +377,18 @@ fun getGradientColors(score: Int): List<Color> = when (score) {
 private fun formatDate(timestamp: Long): String {
     val sdf = SimpleDateFormat("EEEE, MMM d", Locale.getDefault())
     return sdf.format(Date(timestamp * 1000))
+}
+
+@Composable
+fun WeatherDetailsScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Hello",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold
+        )
+    }
 }
