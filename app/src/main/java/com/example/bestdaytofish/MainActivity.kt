@@ -89,7 +89,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     var selectedItem by remember { mutableStateOf(0) }
-    var showWeatherDetails by remember { mutableStateOf(false) }
     
     val navigationItems = listOf(
         BottomNavigationItem(
@@ -119,40 +118,31 @@ fun MainScreen() {
         )
     )
 
-    if (showWeatherDetails) {
-        WeatherDetailsScreen()
-    } else {
-        Scaffold(
-            bottomBar = {
-                NavigationBar {
-                    navigationItems.forEachIndexed { index, item ->
-                        NavigationBarItem(
-                            icon = item.icon,
-                            label = { Text(item.title) },
-                            selected = selectedItem == index,
-                            onClick = { 
-                                selectedItem = index
-                                if (index == 0) {
-                                    showWeatherDetails = true
-                                }
-                            }
-                        )
-                    }
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                navigationItems.forEachIndexed { index, item ->
+                    NavigationBarItem(
+                        icon = item.icon,
+                        label = { Text(item.title) },
+                        selected = selectedItem == index,
+                        onClick = { selectedItem = index }
+                    )
                 }
             }
-        ) { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                when (selectedItem) {
-                    0 -> WeatherScreen()
-                    1 -> Text("Search Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
-                    2 -> Text("Favorites Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
-                    3 -> Text("Account Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
-                    4 -> FaqScreen()
-                }
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when (selectedItem) {
+                0 -> WeatherScreen()
+                1 -> Text("Search Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                2 -> Text("Favorites Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                3 -> Text("Account Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                4 -> FaqScreen()
             }
         }
     }
