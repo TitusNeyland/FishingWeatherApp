@@ -45,6 +45,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import kotlinx.coroutines.delay
 
 data class BottomNavigationItem(
     val title: String,
@@ -54,8 +56,20 @@ data class BottomNavigationItem(
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
+        
         super.onCreate(savedInstanceState)
+        
+        var keepSplashScreen = true
+        splashScreen.setKeepOnScreenCondition { keepSplashScreen }
+        
         setContent {
+            LaunchedEffect(Unit) {
+                // Simulate loading time
+                delay(1000)
+                keepSplashScreen = false
+            }
+            
             BestDayToFishTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
