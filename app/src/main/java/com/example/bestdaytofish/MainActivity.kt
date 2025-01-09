@@ -59,6 +59,14 @@ import com.example.bestdaytofish.viewmodel.FishSearchViewModel
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import com.example.bestdaytofish.viewmodel.FavoritesViewModel
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import com.example.bestdaytofish.viewmodel.AccountViewModel
 
 data class BottomNavigationItem(
     val title: String,
@@ -149,7 +157,7 @@ fun MainScreen() {
                 0 -> WeatherScreen()
                 1 -> SearchScreen()
                 2 -> FavoritesScreen()
-                3 -> Text("Account Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                3 -> AccountScreen()
                 4 -> FaqScreen()
             }
         }
@@ -823,6 +831,126 @@ fun FavoritesScreen(
                         isFavorite = true,
                         onFavoriteClick = { favoritesViewModel.toggleFavorite(fish) }
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AccountScreen(viewModel: AccountViewModel = viewModel()) {
+    var passwordVisible by remember { mutableStateOf(false) }
+    
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (!viewModel.isLoggedIn) {
+            // Login Form
+            Text(
+                text = "Login",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 32.dp)
+            )
+            
+            OutlinedTextField(
+                value = viewModel.email,
+                onValueChange = { viewModel.updateEmail(it) },
+                label = { Text("Email") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Email,
+                        contentDescription = "Email"
+                    )
+                }
+            )
+            
+            OutlinedTextField(
+                value = viewModel.password,
+                onValueChange = { viewModel.updatePassword(it) },
+                label = { Text("Password") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "Password"
+                    )
+                },
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        )
+                    }
+                },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
+            )
+            
+            if (viewModel.error != null) {
+                Text(
+                    text = viewModel.error!!,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+            
+            Button(
+                onClick = { viewModel.login() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+            ) {
+                Text("Login")
+            }
+            
+            TextButton(onClick = { /* TODO: Implement sign up */ }) {
+                Text("Don't have an account? Sign up")
+            }
+        } else {
+            // Logged In State
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Account",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .padding(bottom = 16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                
+                Text(
+                    text = "Welcome!",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                Text(
+                    text = viewModel.email,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+                
+                Button(
+                    onClick = { viewModel.logout() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Logout")
                 }
             }
         }
