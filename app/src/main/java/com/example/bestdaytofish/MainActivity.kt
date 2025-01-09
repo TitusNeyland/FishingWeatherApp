@@ -165,7 +165,7 @@ fun MainScreen() {
 }
 
 @Composable
-fun TopBar() {
+fun TopBar(accountViewModel: AccountViewModel = viewModel()) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -173,12 +173,26 @@ fun TopBar() {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Default.WaterDrop,
-            contentDescription = "Water Drop",
-            modifier = Modifier.size(32.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.WaterDrop,
+                contentDescription = "Water Drop",
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            
+            if (accountViewModel.isLoggedIn && accountViewModel.firstName.isNotEmpty()) {
+                Text(
+                    text = "Welcome, ${accountViewModel.firstName}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
         
         IconButton(
             onClick = { /* TODO: Handle menu click */ }
@@ -194,7 +208,10 @@ fun TopBar() {
 }
 
 @Composable
-fun WeatherScreen(viewModel: WeatherViewModel = viewModel()) {
+fun WeatherScreen(
+    viewModel: WeatherViewModel = viewModel(),
+    accountViewModel: AccountViewModel = viewModel()
+) {
     LaunchedEffect(Unit) {
         viewModel.fetchWeather()
     }
@@ -206,7 +223,7 @@ fun WeatherScreen(viewModel: WeatherViewModel = viewModel()) {
             .padding(16.dp)
     ) {
         Column {
-            TopBar()
+            TopBar(accountViewModel)
 
             when {
                 viewModel.isLoading -> {
@@ -840,6 +857,7 @@ fun FavoritesScreen(
 @Composable
 fun AccountScreen(viewModel: AccountViewModel = viewModel()) {
     var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
     
     Column(
         modifier = Modifier
@@ -849,13 +867,46 @@ fun AccountScreen(viewModel: AccountViewModel = viewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (!viewModel.isLoggedIn) {
-            // Login Form
+            // Login/Sign Up Form
             Text(
-                text = "Login",
+                text = if (viewModel.isSignUpMode) "Create Account" else "Login",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 32.dp)
             )
+            
+            if (viewModel.isSignUpMode) {
+                // Name fields only shown during sign up
+                OutlinedTextField(
+                    value = viewModel.firstName,
+                    onValueChange = { viewModel.updateFirstName(it) },
+                    label = { Text("First Name") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "First Name"
+                        )
+                    }
+                )
+                
+                OutlinedTextField(
+                    value = viewModel.lastName,
+                    onValueChange = { viewModel.updateLastName(it) },
+                    label = { Text("Last Name") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Last Name"
+                        )
+                    }
+                )
+            }
             
             OutlinedTextField(
                 value = viewModel.email,
@@ -896,6 +947,32 @@ fun AccountScreen(viewModel: AccountViewModel = viewModel()) {
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
             )
             
+            if (viewModel.isSignUpMode) {
+                OutlinedTextField(
+                    value = viewModel.confirmPassword,
+                    onValueChange = { viewModel.updateConfirmPassword(it) },
+                    label = { Text("Confirm Password") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "Confirm Password"
+                        )
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                            Icon(
+                                imageVector = if (confirmPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password"
+                            )
+                        }
+                    },
+                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation()
+                )
+            }
+            
             if (viewModel.error != null) {
                 Text(
                     text = viewModel.error!!,
@@ -905,16 +982,28 @@ fun AccountScreen(viewModel: AccountViewModel = viewModel()) {
             }
             
             Button(
-                onClick = { viewModel.login() },
+                onClick = { 
+                    if (viewModel.isSignUpMode) {
+                        viewModel.signUp()
+                    } else {
+                        viewModel.login()
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)
             ) {
-                Text("Login")
+                Text(if (viewModel.isSignUpMode) "Sign Up" else "Login")
             }
             
-            TextButton(onClick = { /* TODO: Implement sign up */ }) {
-                Text("Don't have an account? Sign up")
+            TextButton(onClick = { viewModel.toggleSignUpMode() }) {
+                Text(
+                    if (viewModel.isSignUpMode) {
+                        "Already have an account? Login"
+                    } else {
+                        "Don't have an account? Sign up"
+                    }
+                )
             }
         } else {
             // Logged In State
@@ -934,7 +1023,7 @@ fun AccountScreen(viewModel: AccountViewModel = viewModel()) {
                 )
                 
                 Text(
-                    text = "Welcome!",
+                    text = "Welcome${if (viewModel.firstName.isNotEmpty()) ", ${viewModel.firstName}" else ""}!",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
