@@ -426,35 +426,151 @@ fun WeatherDetailsScreen() {
 private val faqArticles = listOf(
     FaqArticle(
         "Best Time of Day to Fish",
-        "Dawn and dusk are generally the best times to fish. During these periods, fish are more active due to cooler temperatures and reduced light. Early morning is particularly good as many fish species feed actively during this time.",
+        "Dawn and dusk are generally the best times to fish. During these periods, fish are more active due to cooler temperatures and reduced light. Early morning is particularly good as many fish species feed actively during this time.\n\n" +
+        "• Dawn (30 min before sunrise): Prime feeding time\n" +
+        "• Early Morning (until 8am): High activity\n" +
+        "• Mid-Day: Reduced activity, fish deeper\n" +
+        "• Dusk (30 min before sunset): Second feeding period\n" +
+        "• Night: Good for certain species",
         "Timing"
     ),
     FaqArticle(
         "Seasonal Fishing Guide",
-        "Spring: Fish are more active as waters warm up\n" +
-        "Summer: Early morning and late evening are best\n" +
-        "Fall: Mid-morning to late afternoon is optimal\n" +
-        "Winter: Mid-day fishing when temperatures are warmest",
+        "Each season offers unique fishing opportunities:\n\n" +
+        "Spring (March-May):\n" +
+        "• Fish move to shallow waters\n" +
+        "• Pre-spawn feeding increases\n" +
+        "• Best time for bass and crappie\n\n" +
+        "Summer (June-August):\n" +
+        "• Early morning and late evening best\n" +
+        "• Fish move to deeper, cooler waters\n" +
+        "• Focus on structure and shade\n\n" +
+        "Fall (September-November):\n" +
+        "• Fish feed heavily for winter\n" +
+        "• Follow baitfish movements\n" +
+        "• Excellent for all species\n\n" +
+        "Winter (December-February):\n" +
+        "• Slower presentations needed\n" +
+        "• Fish deeper waters\n" +
+        "• Ice fishing opportunities",
         "Seasons"
     ),
     FaqArticle(
         "Weather Impact on Fishing",
-        "Fish are most active when barometric pressure is steady or on the rise. Light rain can trigger feeding activity, while heavy storms may cause fish to become less active. Overcast conditions often provide excellent fishing opportunities.",
+        "Weather conditions significantly affect fish behavior:\n\n" +
+        "Barometric Pressure:\n" +
+        "• Rising: Increased activity\n" +
+        "• Stable High: Moderate activity\n" +
+        "• Falling: Decreased activity\n\n" +
+        "Cloud Cover:\n" +
+        "• Overcast: Extended feeding periods\n" +
+        "• Sunny: Fish seek shade\n\n" +
+        "Rain:\n" +
+        "• Light Rain: Excellent fishing\n" +
+        "• Heavy Rain: Decreased visibility\n" +
+        "• Post-Rain: Increased activity",
         "Weather"
     ),
     FaqArticle(
         "Moon Phases and Fishing",
-        "Full and new moons typically offer better fishing conditions due to stronger tidal movements. The three days leading up to and after these moon phases are particularly good for fishing.",
+        "Moon phases influence fish feeding patterns:\n\n" +
+        "Full Moon:\n" +
+        "• Increased nighttime activity\n" +
+        "• Better for surface feeding\n" +
+        "• Peak feeding 2 days before/after\n\n" +
+        "New Moon:\n" +
+        "• Enhanced daytime feeding\n" +
+        "• Fish more structure-oriented\n" +
+        "• Strong dawn/dusk periods\n\n" +
+        "Quarter Moons:\n" +
+        "• Moderate activity levels\n" +
+        "• More predictable patterns",
         "Timing"
     ),
     FaqArticle(
         "Water Temperature Guide",
-        "Different fish species are active at different temperatures:\n" +
-        "• Bass: 60-75°F\n" +
-        "• Trout: 50-65°F\n" +
+        "Optimal temperature ranges for common species:\n\n" +
+        "Bass:\n" +
+        "• Largemouth: 60-75°F\n" +
+        "• Smallmouth: 65-70°F\n\n" +
+        "Trout:\n" +
+        "• Rainbow: 50-65°F\n" +
+        "• Brown: 50-65°F\n\n" +
+        "Other Species:\n" +
         "• Walleye: 55-70°F\n" +
-        "• Catfish: 70-85°F",
+        "• Catfish: 70-85°F\n" +
+        "• Crappie: 60-75°F\n" +
+        "• Pike: 55-65°F",
         "Conditions"
+    ),
+    FaqArticle(
+        "Essential Fishing Equipment",
+        "Basic gear for successful fishing:\n\n" +
+        "Rod & Reel:\n" +
+        "• Spinning: Versatile, beginner-friendly\n" +
+        "• Baitcasting: Better control, experienced\n" +
+        "• Length: 6-7ft for general use\n\n" +
+        "Line Types:\n" +
+        "• Monofilament: All-purpose, good stretch\n" +
+        "• Fluorocarbon: Less visible, sensitive\n" +
+        "• Braided: Strong, no stretch\n\n" +
+        "Basic Tackle:\n" +
+        "• Hooks: Various sizes (4-3/0)\n" +
+        "• Sinkers: Split-shot, bullet weights\n" +
+        "• Bobbers: Visual strike indication",
+        "Equipment"
+    ),
+    FaqArticle(
+        "Bait Selection Guide",
+        "Choosing the right bait is crucial:\n\n" +
+        "Live Bait:\n" +
+        "• Worms: Universal appeal\n" +
+        "• Minnows: Great for predatory fish\n" +
+        "• Crickets: Pan fish favorite\n\n" +
+        "Artificial Lures:\n" +
+        "• Soft Plastics: Worms, creatures\n" +
+        "• Crankbaits: Various depths\n" +
+        "• Spinners: Flash and vibration\n" +
+        "• Topwater: Surface action\n\n" +
+        "Match the Hatch:\n" +
+        "• Observe local forage\n" +
+        "• Match size and color\n" +
+        "• Consider water clarity",
+        "Techniques"
+    ),
+    FaqArticle(
+        "Reading Water Features",
+        "Understanding where fish hold:\n\n" +
+        "Structure Types:\n" +
+        "• Points: Extend into deeper water\n" +
+        "• Drop-offs: Depth changes\n" +
+        "• Weed edges: Cover and food\n\n" +
+        "Current Areas:\n" +
+        "• Eddies: Resting spots\n" +
+        "• Seams: Different flow speeds\n" +
+        "• Undercut banks: Protection\n\n" +
+        "Cover Elements:\n" +
+        "• Logs: Ambush points\n" +
+        "• Rocks: Heat retention\n" +
+        "• Vegetation: Oxygen and shelter",
+        "Locations"
+    ),
+    FaqArticle(
+        "Fishing Techniques",
+        "Popular fishing methods:\n\n" +
+        "Casting Techniques:\n" +
+        "• Overhead: Basic, accurate\n" +
+        "• Sidearm: Under obstacles\n" +
+        "• Flip/Pitch: Close quarters\n\n" +
+        "Retrieval Styles:\n" +
+        "• Steady: Constant speed\n" +
+        "• Stop-and-go: Triggering strikes\n" +
+        "• Jerking: Erratic action\n\n" +
+        "Presentation Tips:\n" +
+        "• Match speed to temperature\n" +
+        "• Vary retrieve until success\n" +
+        "• Consider fish mood",
+        "Techniques"
     )
 )
 
