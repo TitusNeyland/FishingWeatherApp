@@ -53,6 +53,9 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Divider
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.ui.text.font.FontStyle
+import com.example.bestdaytofish.data.Fish
+import com.example.bestdaytofish.viewmodel.FishSearchViewModel
 
 data class BottomNavigationItem(
     val title: String,
@@ -141,7 +144,7 @@ fun MainScreen() {
         ) {
             when (selectedItem) {
                 0 -> WeatherScreen()
-                1 -> Text("Search Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                1 -> SearchScreen()
                 2 -> Text("Favorites Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
                 3 -> Text("Account Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
                 4 -> FaqScreen()
@@ -652,5 +655,95 @@ fun FaqArticleCard(article: FaqArticle) {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun SearchScreen(viewModel: FishSearchViewModel = viewModel()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp)
+    ) {
+        TextField(
+            value = viewModel.searchQuery,
+            onValueChange = { viewModel.onSearchQueryChange(it) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            placeholder = { Text("Search for fish species...") },
+            leadingIcon = { 
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = "Search"
+                )
+            }
+        )
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(viewModel.searchResults) { fish ->
+                FishCard(fish)
+            }
+        }
+    }
+}
+
+@Composable
+fun FishCard(fish: Fish) {
+    var expanded by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = fish.name,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = fish.scientificName,
+                style = MaterialTheme.typography.bodyMedium,
+                fontStyle = FontStyle.Italic,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            if (expanded) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = fish.description)
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                InfoSection("Habitat", fish.habitat)
+                InfoSection("Diet", fish.diet)
+                InfoSection("Average Size", fish.averageSize)
+                InfoSection("Temperature Range", fish.temperatureRange)
+                
+                InfoSection("Best Baits", fish.bestBaits.joinToString("\n• ", prefix = "• "))
+                InfoSection("Fishing Techniques", fish.fishingTechniques.joinToString("\n• ", prefix = "• "))
+            }
+        }
+    }
+}
+
+@Composable
+private fun InfoSection(title: String, content: String) {
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = content,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
