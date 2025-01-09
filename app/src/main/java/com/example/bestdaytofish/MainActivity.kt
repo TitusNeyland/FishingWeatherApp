@@ -56,6 +56,9 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.text.font.FontStyle
 import com.example.bestdaytofish.data.Fish
 import com.example.bestdaytofish.viewmodel.FishSearchViewModel
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import com.example.bestdaytofish.viewmodel.FavoritesViewModel
 
 data class BottomNavigationItem(
     val title: String,
@@ -145,7 +148,7 @@ fun MainScreen() {
             when (selectedItem) {
                 0 -> WeatherScreen()
                 1 -> SearchScreen()
-                2 -> Text("Favorites Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
+                2 -> FavoritesScreen()
                 3 -> Text("Account Screen - Coming Soon", modifier = Modifier.align(Alignment.Center))
                 4 -> FaqScreen()
             }
@@ -659,7 +662,10 @@ fun FaqArticleCard(article: FaqArticle) {
 }
 
 @Composable
-fun SearchScreen(viewModel: FishSearchViewModel = viewModel()) {
+fun SearchScreen(
+    viewModel: FishSearchViewModel = viewModel(),
+    favoritesViewModel: FavoritesViewModel = viewModel()
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -685,18 +691,27 @@ fun SearchScreen(viewModel: FishSearchViewModel = viewModel()) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(viewModel.searchResults) { fish ->
-                FishCard(fish)
+                FishCard(
+                    fish = fish,
+                    isFavorite = favoritesViewModel.favoriteFish.contains(fish.name),
+                    onFavoriteClick = { favoritesViewModel.toggleFavorite(fish) }
+                )
             }
         }
     }
 }
 
 @Composable
-fun FishCard(fish: Fish) {
+fun FishCard(
+    fish: Fish,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     var expanded by remember { mutableStateOf(false) }
     
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { expanded = !expanded },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -704,17 +719,33 @@ fun FishCard(fish: Fish) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = fish.name,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = fish.scientificName,
-                style = MaterialTheme.typography.bodyMedium,
-                fontStyle = FontStyle.Italic,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = fish.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = fish.scientificName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                IconButton(onClick = onFavoriteClick) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                        tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
             
             if (expanded) {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -745,5 +776,55 @@ private fun InfoSection(title: String, content: String) {
             text = content,
             style = MaterialTheme.typography.bodyMedium
         )
+    }
+}
+
+@Composable
+fun FavoritesScreen(
+    viewModel: FavoritesViewModel = viewModel(),
+    favoritesViewModel: FavoritesViewModel = viewModel()
+) {
+    val favoriteFish = favoritesViewModel.getFavoriteFish()
+    
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Favorites",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            textAlign = TextAlign.Center
+        )
+        
+        if (favoriteFish.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No favorite fish yet",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(favoriteFish) { fish ->
+                    FishCard(
+                        fish = fish,
+                        isFavorite = true,
+                        onFavoriteClick = { favoritesViewModel.toggleFavorite(fish) }
+                    )
+                }
+            }
+        }
     }
 }

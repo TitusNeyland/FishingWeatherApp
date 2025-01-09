@@ -300,4 +300,6 @@ object FishRepository {
             }
         }
     }
+
+    fun getAllFish(): List<Fish> = fishList
 } 
